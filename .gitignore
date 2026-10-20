@@ -1,1 +1,33 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files (use cloud storage in production)
+uploads/issues/*
+uploads/avatars/*
+!uploads/.gitkeep
+!uploads/issues/.gitkeep
+!uploads/avatars/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/

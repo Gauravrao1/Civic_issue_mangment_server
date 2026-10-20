@@ -8,15 +8,17 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// Ensure upload directories exist
+const uploadDirs = ['uploads/issues', 'uploads/avatars'];
+uploadDirs.forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath, { recursive: true });
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 5000;
-const uploadDirectory = process.env.UPLOAD_PATH
-  ? path.resolve(process.env.UPLOAD_PATH)
-  : process.env.VERCEL
-    ? path.join('/tmp', 'civic-portal-uploads')
-    : path.join(__dirname, 'uploads');
-
-fs.mkdirSync(uploadDirectory, { recursive: true });
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -46,10 +48,11 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
+const corsOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+  : ['http://localhost:3000'];
 app.use(cors({
-  origin: process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : ['http://localhost:3000'],
+  origin: corsOrigins,
   credentials: true
 }));
 
@@ -61,7 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined'));
 
 // Static files
-app.use('/uploads', express.static(uploadDirectory));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -81,7 +84,7 @@ app.use('/api/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes);
 
 // Serve static files from React build in production
-if (process.env.SERVE_CLIENT === 'true') {
+if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
   
   app.get('*', (req, res) => {
@@ -100,20 +103,11 @@ app.use('*', (req, res) => {
   });
 });
 
-let databaseInitialization;
-
-const ensureDatabaseInitialized = () => {
-  if (!databaseInitialization) {
-    databaseInitialization = initializeDatabase();
-  }
-  return databaseInitialization;
-};
-
 // Initialize database and start server
 const startServer = async () => {
   try {
     // Initialize database on startup
-    await ensureDatabaseInitialized();
+    await initializeDatabase();
     
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -126,19 +120,6 @@ const startServer = async () => {
   }
 };
 
-if (require.main === module) {
-  startServer();
-}
+startServer();
 
-module.exports = async (req, res) => {
-  try {
-    await ensureDatabaseInitialized();
-    return app(req, res);
-  } catch (error) {
-    console.error('❌ Serverless request initialization failed:', error);
-    return res.status(503).json({
-      success: false,
-      message: 'Service temporarily unavailable'
-    });
-  }
-};
+module.exports = app;

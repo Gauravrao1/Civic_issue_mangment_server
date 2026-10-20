@@ -1,49 +1,64 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const databaseUrl = process.env.DATABASE_URL?.trim();
+let sequelize;
 
-if (process.env.VERCEL && !databaseUrl) {
-  throw new Error(
-    'DATABASE_URL is required when running on Vercel. Configure a hosted PostgreSQL connection string in the Vercel project settings.'
+if (process.env.DATABASE_URL) {
+  // Production: use DATABASE_URL provided by Render (PostgreSQL)
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    define: {
+      timestamps: true,
+      underscored: true,
+      freezeTableName: true
+    }
+  });
+} else {
+  // Development: use individual DB env vars or default local PostgreSQL
+  sequelize = new Sequelize(
+    process.env.DB_NAME || 'civic_portal',
+    process.env.DB_USER || 'postgres',
+    process.env.DB_PASSWORD || 'postgres',
+    {
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT) || 5432,
+      dialect: 'postgres',
+      logging: process.env.NODE_ENV === 'development' ? console.log : false,
+      pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+      },
+      define: {
+        timestamps: true,
+        underscored: true,
+        freezeTableName: true
+      }
+    }
   );
 }
-
-const databaseOptions = databaseUrl
-  ? {
-      dialect: 'postgres',
-      url: databaseUrl,
-      dialectOptions: process.env.NODE_ENV === 'production' || process.env.VERCEL
-        ? { ssl: { require: true, rejectUnauthorized: false } }
-        : {}
-    }
-  : {
-      dialect: 'sqlite',
-      storage: './civic_portal.db'
-    };
-
-const sequelize = new Sequelize({
-  ...databaseOptions,
-  logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  },
-  define: {
-    timestamps: true,
-    underscored: true,
-    freezeTableName: true
-  }
-});
 
 // Test database connection
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
-    console.log(`📁 Using ${databaseUrl ? 'PostgreSQL' : 'SQLite'} database`);
+    console.log(`📁 Using PostgreSQL database`);
   } catch (error) {
     console.error('❌ Unable to connect to the database:', error);
   }

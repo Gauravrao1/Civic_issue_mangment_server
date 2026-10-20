@@ -4,7 +4,7 @@ const { DataTypes } = require('sequelize');
 // User Model
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
@@ -41,7 +41,7 @@ const User = sequelize.define('User', {
     }
   },
   departmentId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'departments',
@@ -63,7 +63,7 @@ const User = sequelize.define('User', {
 // Department Model
 const Department = sequelize.define('Department', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
@@ -98,7 +98,7 @@ const Department = sequelize.define('Department', {
 // Issue Category Model
 const IssueCategory = sequelize.define('IssueCategory', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
@@ -112,7 +112,7 @@ const IssueCategory = sequelize.define('IssueCategory', {
     allowNull: true
   },
   departmentId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {
       model: 'departments',
@@ -141,7 +141,7 @@ const IssueCategory = sequelize.define('IssueCategory', {
 // Issue Model
 const Issue = sequelize.define('Issue', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
@@ -154,7 +154,7 @@ const Issue = sequelize.define('Issue', {
     allowNull: false
   },
   categoryId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {
       model: 'issue_categories',
@@ -213,7 +213,7 @@ const Issue = sequelize.define('Issue', {
     }
   },
   assignedTo: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'users',
@@ -265,12 +265,12 @@ const Issue = sequelize.define('Issue', {
 // Issue Comment Model
 const IssueComment = sequelize.define('IssueComment', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
   issueId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {
       model: 'issues',
@@ -278,7 +278,7 @@ const IssueComment = sequelize.define('IssueComment', {
     }
   },
   userId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'users',
@@ -311,12 +311,12 @@ const IssueComment = sequelize.define('IssueComment', {
 // Issue Status History Model
 const IssueStatusHistory = sequelize.define('IssueStatusHistory', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
   issueId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {
       model: 'issues',
@@ -338,7 +338,7 @@ const IssueStatusHistory = sequelize.define('IssueStatusHistory', {
     }
   },
   changedBy: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'users',
@@ -356,12 +356,12 @@ const IssueStatusHistory = sequelize.define('IssueStatusHistory', {
 // Notification Model
 const Notification = sequelize.define('Notification', {
   id: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
   userId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'users',
@@ -369,7 +369,7 @@ const Notification = sequelize.define('Notification', {
     }
   },
   issueId: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     allowNull: true,
     references: {
       model: 'issues',
