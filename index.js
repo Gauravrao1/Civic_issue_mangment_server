@@ -62,6 +62,16 @@ app.use(morgan('combined'));
 // Static files
 app.use('/uploads', express.static(uploadDirectory));
 
+// Service information endpoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    service: 'Civic Issue Management API',
+    status: 'running',
+    health: '/api/health'
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
