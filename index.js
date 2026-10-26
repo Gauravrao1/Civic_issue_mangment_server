@@ -113,6 +113,8 @@ const isHealthCheckRequest = (req) => {
   return req.method === 'GET' && requestPath === '/api/health';
 };
 
+const isApiRequest = (req) => (req.url || '').split('?')[0].startsWith('/api/');
+
 // Initialize database and start server
 const startServer = async () => {
   try {
@@ -138,7 +140,7 @@ module.exports = async (req, res) => {
   try {
     // Keep the health endpoint available so missing deployment configuration
     // is reported by the application instead of as a Vercel invocation error.
-    if (!isHealthCheckRequest(req)) {
+    if (isApiRequest(req) && !isHealthCheckRequest(req)) {
       await ensureDatabaseInitialized();
     }
     return app(req, res);
