@@ -14,8 +14,7 @@ module.exports = async (req, res) => {
     console.error('❌ Failed to load application handler:', error);
     return res.status(500).json({
       success: false,
-      message: 'Application failed to load',
-      error: error.message
+      message: 'Application failed to load'
     });
   }
 };

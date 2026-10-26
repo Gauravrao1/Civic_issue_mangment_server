@@ -1,4 +1,5 @@
 const { Sequelize } = require('sequelize');
+const pg = require('pg');
 require('dotenv').config();
 
 const databaseUrl = [
@@ -21,6 +22,7 @@ let sequelize;
 if (databaseUrl) {
   sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
+    dialectModule: pg,
     protocol: 'postgres',
     logging: false,
     dialectOptions: {
@@ -50,6 +52,7 @@ if (databaseUrl) {
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT) || 5432,
       dialect: 'postgres',
+      dialectModule: pg,
       logging: process.env.NODE_ENV === 'development' ? console.log : false,
       pool: {
         max: 5,
