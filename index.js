@@ -103,11 +103,25 @@ app.use('*', (req, res) => {
   });
 });
 
+let databaseInitialization;
+
+const ensureDatabaseInitialized = () => {
+  if (!databaseInitialization) {
+    databaseInitialization = initializeDatabase();
+  }
+  return databaseInitialization;
+};
+
+const isHealthCheckRequest = (req) => {
+  const requestPath = (req.url || '').split('?')[0];
+  return req.method === 'GET' && requestPath === '/api/health';
+};
+
 // Initialize database and start server
 const startServer = async () => {
   try {
     // Initialize database on startup
-    await initializeDatabase();
+    await ensureDatabaseInitialized();
     
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
@@ -120,6 +134,23 @@ const startServer = async () => {
   }
 };
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
 
-module.exports = app;
+module.exports = async (req, res) => {
+  try {
+    // Keep the health endpoint available so missing deployment configuration
+    // is reported by the application instead of as a Vercel invocation error.
+    if (!isHealthCheckRequest(req)) {
+      await ensureDatabaseInitialized();
+    }
+    return app(req, res);
+  } catch (error) {
+    console.error('❌ Serverless request initialization failed:', error);
+    return res.status(503).json({
+      success: false,
+      message: 'Service temporarily unavailable'
+    });
+  }
+};

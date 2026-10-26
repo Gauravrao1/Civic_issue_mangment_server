@@ -1,11 +1,25 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+const databaseUrl = [
+  process.env.DATABASE_URL,
+  process.env.POSTGRES_URL,
+  process.env.POSTGRES_PRISMA_URL,
+  process.env.POSTGRES_URL_NON_POOLING
+]
+  .map(value => value?.trim())
+  .find(Boolean);
+
+const databaseConfigurationError = process.env.VERCEL && !databaseUrl
+  ? new Error(
+      'A hosted PostgreSQL connection string is required on Vercel. Set DATABASE_URL (or POSTGRES_URL) in the Vercel project settings.'
+    )
+  : null;
+
 let sequelize;
 
-if (process.env.DATABASE_URL) {
-  // Production: use DATABASE_URL provided by Render (PostgreSQL)
-  sequelize = new Sequelize(process.env.DATABASE_URL, {
+if (databaseUrl) {
+  sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     protocol: 'postgres',
     logging: false,
@@ -28,7 +42,6 @@ if (process.env.DATABASE_URL) {
     }
   });
 } else {
-  // Development: use individual DB env vars or default local PostgreSQL
   sequelize = new Sequelize(
     process.env.DB_NAME || 'civic_portal',
     process.env.DB_USER || 'postgres',
@@ -56,6 +69,10 @@ if (process.env.DATABASE_URL) {
 // Test database connection
 const testConnection = async () => {
   try {
+    if (databaseConfigurationError) {
+      throw databaseConfigurationError;
+    }
+
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
     console.log(`📁 Using PostgreSQL database`);
