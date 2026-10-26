@@ -20,10 +20,10 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDirectory = process.env.UPLOAD_PATH
-      ? path.resolve(process.env.UPLOAD_PATH)
-      : process.env.VERCEL
-        ? path.join('/tmp', 'civic-portal-uploads')
+    const uploadDirectory = process.env.VERCEL
+      ? path.join('/tmp', 'civic-portal-uploads')
+      : process.env.UPLOAD_PATH
+        ? path.resolve(process.env.UPLOAD_PATH)
         : path.join(__dirname, '../uploads');
     const issueUploadDirectory = path.join(uploadDirectory, 'issues');
     fs.mkdirSync(issueUploadDirectory, { recursive: true });

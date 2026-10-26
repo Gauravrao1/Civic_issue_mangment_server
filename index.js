@@ -8,10 +8,16 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+const uploadDirectory = process.env.VERCEL
+  ? path.join('/tmp', 'civic-portal-uploads')
+  : process.env.UPLOAD_PATH
+    ? path.resolve(process.env.UPLOAD_PATH)
+    : path.join(__dirname, 'uploads');
+
 // Ensure upload directories exist
-const uploadDirs = ['uploads/issues', 'uploads/avatars'];
+const uploadDirs = ['issues', 'avatars'];
 uploadDirs.forEach(dir => {
-  const fullPath = path.join(__dirname, dir);
+  const fullPath = path.join(uploadDirectory, dir);
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
   }
@@ -64,7 +70,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined'));
 
 // Static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadDirectory));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
