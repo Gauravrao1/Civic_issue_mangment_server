@@ -5,7 +5,6 @@ const compression = require('compression');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
 const uploadDirectory = process.env.VERCEL
@@ -13,15 +12,6 @@ const uploadDirectory = process.env.VERCEL
   : process.env.UPLOAD_PATH
     ? path.resolve(process.env.UPLOAD_PATH)
     : path.join(__dirname, 'uploads');
-
-// Ensure upload directories exist
-const uploadDirs = ['issues', 'avatars'];
-uploadDirs.forEach(dir => {
-  const fullPath = path.join(uploadDirectory, dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
-  }
-});
 
 const app = express();
 const PORT = process.env.PORT || 5000;
