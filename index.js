@@ -80,7 +80,7 @@ app.use('/api/analytics', authenticateToken, analyticsRoutes);
 app.use('/api/notifications', authenticateToken, notificationRoutes);
 
 // Serve static files from React build in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.SERVE_CLIENT === 'true') {
   app.use(express.static(path.join(__dirname, '../client/build')));
   
   app.get('*', (req, res) => {
